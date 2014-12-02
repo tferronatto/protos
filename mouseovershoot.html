@@ -9,6 +9,7 @@
     var HTILE = TILE/2;
     var ROWS = 20;
     var COLS = 20;
+    var bg, grid;
     var player, enemy, cursors;
     var moveTarget = {x: 0, y: 0};
     var game = new Phaser.Game(COLS * TILE, ROWS * TILE, Phaser.AUTO, '', {preload: preload, create: create, update: update});
@@ -23,9 +24,14 @@
         // init physics
         game.physics.startSystem(Phaser.Physics.ARCADE);
         
+        //init bg
+        bg = new Phaser.Rectangle(0, 0, game.world.width, game.world.height);
+        
+        
         //init enemy
         enemy = game.add.sprite(rndInt(0, game.world.width - 251), rndInt(0, game.world.height - 186), 'lizardAppear');
         enemy.inputEnabled = true;
+        enemy.underAim = false;
         enemy.animations.add('appear');
         enemy.events.onAnimationComplete.add(appearComplete, this);
         enemy.events.onInputOver.add(enemyHighlight, this);
@@ -50,7 +56,6 @@
             player.canMove = false;
             movePlayer(moveTarget.x, moveTarget.y);
         }
-    
     }
     //------------------
     function appearComplete(){
@@ -61,7 +66,7 @@
     }
     //-----------------
     function checkMovePlayer(pointer){
-        if (!player.canMove){
+        if (!player.canMove && !enemy.underAim){
             player.canMove = true;
             moveTarget.x = Math.floor(pointer.x/TILE);
             moveTarget.y = Math.floor(pointer.y/TILE);
@@ -79,9 +84,11 @@
     //----------------
     function enemyHighlight(pointer){
         enemy.tint = 0xff0000;
+        enemy.underAim = true;
     }
     function enemyTintReset(pointer){
         enemy.tint = 0xffffff;
+        enemy.underAim = false;
     }
 
 </script>
