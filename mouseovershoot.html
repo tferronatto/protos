@@ -5,15 +5,38 @@
 </head>
 <body>
 <script>
+    
+    var player, anim, cursors;
     var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {preload: preload, create: create, update: update});
     
     function preload() {
+        game.load.spritesheet('lizardAppear','assets/deimaginator_appear.png', 251, 186, 25);
+        game.load.spritesheet('lizardWalk','assets/deimaginator_walk.png', 251, 186, 16);
     }
     //-------------------
     function create() {
+        player = game.add.sprite(150, game.world.height - 250, 'lizardAppear');
+        anim = player.animations.add('appear');
+        anim.onComplete.add(appearComplete, this);
+        anim.play(20);
+        
+        cursors = game.input.keyboard.createCursorKeys();
     }
     //-------------------
     function update() {
+        
+        if (cursors.left.isDown)
+            player.scale.x = 1;
+        else if (cursors.right.isDown)
+            player.scale.x = -1;
+        
+    }
+    //------------------
+    function appearComplete(){
+        anim.onComplete.removeAll();
+        player.loadTexture('lizardWalk');
+        player.animations.add('walk');
+        player.animations.play('walk', 20, true);
     }
 
 </script>
