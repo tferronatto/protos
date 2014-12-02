@@ -5,38 +5,83 @@
 </head>
 <body>
 <script>
-    
-    var player, anim, cursors;
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {preload: preload, create: create, update: update});
+    var TILE = 32;
+    var HTILE = TILE/2;
+    var ROWS = 20;
+    var COLS = 20;
+    var player, enemy, cursors;
+    var moveTarget = {x: 0, y: 0};
+    var game = new Phaser.Game(COLS * TILE, ROWS * TILE, Phaser.AUTO, '', {preload: preload, create: create, update: update});
     
     function preload() {
         game.load.spritesheet('lizardAppear','assets/deimaginator_appear.png', 251, 186, 25);
-        game.load.spritesheet('lizardWalk','assets/deimaginator_walk.png', 251, 186, 16);
+        game.load.spritesheet('lizardIdle','assets/deimaginator_idle.png', 251, 186, 135);
+        game.load.spritesheet('catFly', 'assets/cat_fly.png', 136, 115, 20);
     }
     //-------------------
     function create() {
-        player = game.add.sprite(150, game.world.height - 250, 'lizardAppear');
-        anim = player.animations.add('appear');
-        anim.onComplete.add(appearComplete, this);
-        anim.play(20);
+        // init physics
+        game.physics.startSystem(Phaser.Physics.ARCADE);
         
+        //init enemy
+        enemy = game.add.sprite(rndInt(0, game.world.width - 251), rndInt(0, game.world.height - 186), 'lizardAppear');
+        enemy.inputEnabled = true;
+        enemy.animations.add('appear');
+        enemy.events.onAnimationComplete.add(appearComplete, this);
+        enemy.events.onInputOver.add(enemyHighlight, this);
+        enemy.events.onInputOut.add(enemyTintReset, this);
+        enemy.animations.play('appear', 20);
+        
+        
+        //init player
+        player = game.add.sprite(HTILE, HTILE, 'catFly');
+        player.anchor.x = player.anchor.y = 0.5;
+        player.animations.add('fly');
+        player.animations.play('fly', 20, true);
+        player.canMove = false;
+        
+        //init inputs
         cursors = game.input.keyboard.createCursorKeys();
+        game.input.onDown.add(checkMovePlayer, this);
     }
     //-------------------
     function update() {
-        
-        if (cursors.left.isDown)
-            player.scale.x = 1;
-        else if (cursors.right.isDown)
-            player.scale.x = -1;
-        
+        if (player.canMove){
+            player.canMove = false;
+            movePlayer(moveTarget.x, moveTarget.y);
+        }
+    
     }
     //------------------
     function appearComplete(){
-        anim.onComplete.removeAll();
-        player.loadTexture('lizardWalk');
-        player.animations.add('walk');
-        player.animations.play('walk', 20, true);
+        enemy.events.onAnimationComplete.remove(appearComplete, this);
+        enemy.loadTexture('lizardIdle');
+        enemy.animations.add('idle');
+        enemy.animations.play('idle', 20, true);
+    }
+    //-----------------
+    function checkMovePlayer(pointer){
+        if (!player.canMove){
+            player.canMove = true;
+            moveTarget.x = Math.floor(pointer.x/TILE);
+            moveTarget.y = Math.floor(pointer.y/TILE);
+        }
+    }
+    
+    function movePlayer(x, y){
+        player.x = (x * TILE) + HTILE;
+        player.y = (y * TILE) + HTILE;
+    }
+    //-----------------
+    function rndInt(min, max){
+        return Math.round(min + (Math.random() * (max-min)));
+    }
+    //----------------
+    function enemyHighlight(pointer){
+        enemy.tint = 0xff0000;
+    }
+    function enemyTintReset(pointer){
+        enemy.tint = 0xffffff;
     }
 
 </script>
