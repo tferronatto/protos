@@ -2,6 +2,9 @@
 <html>
 <head>
     <script src="js/phaser.min.js"></script>
+    <style type="text/css">
+        canvas {border: 0;}
+    </style>
 </head>
 <body>
 <script>
@@ -25,8 +28,20 @@
         game.physics.startSystem(Phaser.Physics.ARCADE);
         
         //init bg
-        bg = new Phaser.Rectangle(0, 0, game.world.width, game.world.height);
-        
+        bg = game.add.graphics(0, 0);
+        bg.beginFill(0xffffff);
+        bg.drawRect(0, 0, game.world.width, game.world.height);
+        bg.endFill();
+        grid = game.add.graphics(0, 0);
+        grid.lineStyle(1, 0x424242);
+        for (var i=0; i < COLS; i++){
+            grid.moveTo(i*TILE, 0);
+            grid.lineTo(i*TILE, game.world.height);
+        }
+        for (var i=0; i < ROWS; i++){
+            grid.moveTo(0, i*TILE);
+            grid.lineTo(game.world.width, i*TILE);
+        }
         
         //init enemy
         enemy = game.add.sprite(rndInt(0, game.world.width - 251), rndInt(0, game.world.height - 186), 'lizardAppear');
