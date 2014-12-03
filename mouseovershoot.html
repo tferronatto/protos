@@ -8,19 +8,22 @@
 </head>
 <body>
 <script>
-    var TILE = 32;
+    var TILE = 64;
     var HTILE = TILE/2;
-    var ROWS = 20;
-    var COLS = 20;
+    var ROWS = 8;
+    var COLS = 12;
     var bg, grid;
-    var player, enemy, cursors;
+    var player, enemy, cursors, bullets;
     var moveTarget = {x: 0, y: 0};
     var game = new Phaser.Game(COLS * TILE, ROWS * TILE, Phaser.AUTO, '', {preload: preload, create: create, update: update});
     
     function preload() {
         game.load.spritesheet('lizardAppear','assets/deimaginator_appear.png', 251, 186, 25);
         game.load.spritesheet('lizardIdle','assets/deimaginator_idle.png', 251, 186, 135);
+        game.load.spritesheet('robotAppear','assets/robot_attract.png', 81, 88, 57);
+        game.load.spritesheet('robotIdle','assets/robot_idle.png', 81, 88, 24);
         game.load.spritesheet('catFly', 'assets/cat_fly.png', 136, 115, 20);
+        game.load.image('bullet', 'assets/bullet.png');
     }
     //-------------------
     function create() {
@@ -33,7 +36,7 @@
         bg.drawRect(0, 0, game.world.width, game.world.height);
         bg.endFill();
         grid = game.add.graphics(0, 0);
-        grid.lineStyle(1, 0x424242);
+        grid.lineStyle(1, 0x999999);
         for (var i=0; i < COLS; i++){
             grid.moveTo(i*TILE, 0);
             grid.lineTo(i*TILE, game.world.height);
@@ -44,7 +47,9 @@
         }
         
         //init enemy
-        enemy = game.add.sprite(rndInt(0, game.world.width - 251), rndInt(0, game.world.height - 186), 'lizardAppear');
+        enemy = game.add.sprite((6 * TILE) + HTILE, (6 * TILE) + HTILE, 'robotAppear');
+        enemy.anchor.x = 0.5;
+        enemy.anchor.y = 0.7;
         enemy.inputEnabled = true;
         enemy.underAim = false;
         enemy.animations.add('appear');
@@ -55,11 +60,15 @@
         
         
         //init player
-        player = game.add.sprite(HTILE, HTILE, 'catFly');
-        player.anchor.x = player.anchor.y = 0.5;
+        player = game.add.sprite((3*TILE)+HTILE, 3*TILE, 'catFly');
+        player.anchor.x = 0.65;
+        player.anchor.y = 0.4;
         player.animations.add('fly');
         player.animations.play('fly', 20, true);
         player.canMove = false;
+        
+        //init bullets
+        
         
         //init inputs
         cursors = game.input.keyboard.createCursorKeys();
@@ -71,11 +80,21 @@
             player.canMove = false;
             movePlayer(moveTarget.x, moveTarget.y);
         }
+        
+        // player always faces enemy
+        if (player.x > enemy.x) {
+            player.scale.x = -1;
+            enemy.scale.x = -1;
+        }
+        else {
+            player.scale.x = 1;
+            enemy.scale.x = 1;
+        }
     }
     //------------------
     function appearComplete(){
         enemy.events.onAnimationComplete.remove(appearComplete, this);
-        enemy.loadTexture('lizardIdle');
+        enemy.loadTexture('robotIdle');
         enemy.animations.add('idle');
         enemy.animations.play('idle', 20, true);
     }
@@ -90,7 +109,7 @@
     
     function movePlayer(x, y){
         player.x = (x * TILE) + HTILE;
-        player.y = (y * TILE) + HTILE;
+        player.y = (y * TILE);
     }
     //-----------------
     function rndInt(min, max){
