@@ -143,9 +143,12 @@
         }
     }
     
-    function movePlayer(x, y){
-        player.x = (x * TILE) + HTILE;
-        player.y = (y * TILE) + HTILE;
+    function movePlayer(posx, posy){
+        //player.x = (posx * TILE) + HTILE;
+        //player.y = (posy * TILE) + HTILE;
+        var tween = game.add.tween(player);
+        tween.to({x: (posx * TILE) + HTILE, y: (posy * TILE) + HTILE}, 2000);
+        tween.start();
     }
     //-----------------
     function rndInt(min, max){
